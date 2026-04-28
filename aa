@@ -1,1 +1,50 @@
-dfdgfd
+
+package com.example.hotwheel.service;
+
+import com.example.hotwheel.entity.Spacecraft;
+import com.example.hotwheel.repository.SpacecraftRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
+@Service
+public class SpacecraftService {
+
+    @Autowired
+    private SpacecraftRepository repository;
+
+    // 1. Lấy danh sách kèm phân trang (mặc định 5 bản ghi/trang theo yêu cầu)
+    public Page<Spacecraft> findAll(int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5); // Trang đầu là 0 nên phải -1
+        return repository.findAll(pageable);
+    }
+
+    // 2. Tìm kiếm kèm phân trang
+    public Page<Spacecraft> search(String keyword, int pageNo) {
+        Pageable pageable = PageRequest.of(pageNo - 1, 5);
+        if (keyword != null && !keyword.isEmpty()) {
+            return repository.searchByKeyword(keyword, pageable);
+        }
+        return repository.findAll(pageable);
+    }
+
+    // 3. Lưu (dùng cho cả Thêm mới và Cập nhật)
+    public void save(Spacecraft spacecraft) {
+        repository.save(spacecraft);
+    }
+
+    // 4. Tìm theo ID (để phục vụ chức năng Sửa)
+    public Spacecraft findById(Long id) {
+        Optional<Spacecraft> optional = repository.findById(id);
+        return optional.orElse(null);
+    }
+
+    // 5. Xóa
+    public void delete(Long id) {
+        repository.deleteById(id);
+    }
+}
